@@ -1,0 +1,18 @@
+package com.infnet.continuum_control.model.entities;
+
+import com.infnet.continuum_control.model.enums.Impacto;
+
+import java.time.LocalDateTime;
+
+public class Intervencao {
+    private long id;
+    private Missao missao;
+    private Agente agente;
+    private LocalDateTime dataHora;
+    private String acao;
+    private String justificativa;
+    private Impacto impactoEstimado;
+    private String resultadoObservado;
+
+    public boolean isSevera(){return false;}
+}
