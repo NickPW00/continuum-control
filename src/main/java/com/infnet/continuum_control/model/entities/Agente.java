@@ -1,8 +1,12 @@
 package com.infnet.continuum_control.model.entities;
 
 import com.infnet.continuum_control.model.enums.SituacaoAgente;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
+@Entity
 public class Agente {
+    @Id
     private Long id;
     private String nome;
     private SituacaoAgente situacao;

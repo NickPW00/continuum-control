@@ -3,12 +3,18 @@ package com.infnet.continuum_control.model.entities;
 import com.infnet.continuum_control.model.enums.Prioridade;
 import com.infnet.continuum_control.model.enums.PropositoMissao;
 import com.infnet.continuum_control.model.enums.SituacaoMissao;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Entity
+@NoArgsConstructor
 public class Missao {
+    @Id
     private long id;
     private String codigo;
     private String objetivo;

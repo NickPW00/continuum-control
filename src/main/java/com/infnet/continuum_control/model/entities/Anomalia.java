@@ -1,11 +1,27 @@
 package com.infnet.continuum_control.model.entities;
 
 import com.infnet.continuum_control.model.enums.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Entity
+@NoArgsConstructor
+@Getter
+@Setter
+
 public class Anomalia {
+    @Id
     private long id;
+    @ManyToOne
+    @JoinColumn(name = "evento_id")
     private EventoHistorico evento;
     private String divergenciaObservada;
     private LocalDateTime dataHoraDetectada;
@@ -49,5 +65,9 @@ public class Anomalia {
         else this.situacao = SituacaoAnomalia.EM_ANALISE;
     }
 
-    private void encerrarAtendimento(){}
+    private void encerrarAtendimento(SituacaoAnomalia situacaoFinal){
+        if (this.situacao == SituacaoAnomalia.EM_CORRECAO || this.situacao == SituacaoAnomalia.IRREVERSIVEL){
+            this.situacao = situacaoFinal;
+        }
+    }
 }
