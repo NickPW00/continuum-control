@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 public class MissaoAgente {
-    @Id
     private long id;
     private Missao missao;
     private Agente agente;

@@ -2,13 +2,14 @@ package com.infnet.continuum_control.model.entities;
 
 import com.infnet.continuum_control.model.enums.SituacaoAgente;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "agente")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Agente {
 
     @Id
