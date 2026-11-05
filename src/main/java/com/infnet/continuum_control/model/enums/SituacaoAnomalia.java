@@ -3,7 +3,7 @@ package com.infnet.continuum_control.model.enums;
 public enum SituacaoAnomalia {
     DETECTADA,
     EM_ANALISE,
-    COFIRMADA,
+    CONFIRMADA,
     EM_CORRECAO,
     ESTABILIZADA,
     IRREVERSIVEL

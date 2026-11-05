@@ -8,10 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
-@NoArgsConstructor
+
 public class Encerramento {
-    @Id
     private long id;
     private Missao missao;
     private String resultado;

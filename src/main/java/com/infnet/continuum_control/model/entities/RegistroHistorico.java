@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Entity
-@NoArgsConstructor
-public class RegisitroHistorico {
-    @Id
+
+public class RegistroHistorico {
     private long id;
     private Anomalia anomalia;
     private TipoRegistro tipo;

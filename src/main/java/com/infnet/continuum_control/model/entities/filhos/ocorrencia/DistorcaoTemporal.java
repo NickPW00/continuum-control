@@ -4,7 +4,7 @@ import com.infnet.continuum_control.model.entities.Ocorrencia;
 
 import java.time.Duration;
 
-public class DistoncaoTemporal extends Ocorrencia {
+public class DistorcaoTemporal extends Ocorrencia {
     private Integer intensidade;
     private Duration duracao;
 }

@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
-@NoArgsConstructor
+
 public class Intervencao {
-    @Id
     private long id;
     private Missao missao;
     private Agente agente;

@@ -5,26 +5,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
-@NoArgsConstructor
-@Getter
-@Setter
-
 public class Anomalia {
-    @Id
     private long id;
-    @ManyToOne
-    @JoinColumn(name = "evento_id")
     private EventoHistorico evento;
     private String divergenciaObservada;
-    private LocalDateTime dataHoraDetectada;
+    private LocalDateTime dataHoraDeteccao;
     private NivelRisco risco;
     private SituacaoAnomalia situacao;
     private OrigemAnomalia origem;
@@ -43,7 +34,7 @@ public class Anomalia {
     }
 
     public void declararIrreversivel(String justificativa){
-        boolean isIrreversivel = this.situacao == SituacaoAnomalia.DETECTADA || this.situacao == SituacaoAnomalia.COFIRMADA;
+        boolean isIrreversivel = this.situacao == SituacaoAnomalia.DETECTADA || this.situacao == SituacaoAnomalia.CONFIRMADA;
         if (isIrreversivel){
             this.situacao = SituacaoAnomalia.IRREVERSIVEL;
             this.observacoes = justificativa;

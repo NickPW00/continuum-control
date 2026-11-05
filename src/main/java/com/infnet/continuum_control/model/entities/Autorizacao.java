@@ -6,10 +6,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Entity
-@NoArgsConstructor
+
 public class Autorizacao {
-    @Id
     private long id;
     private Missao missao;
     private Usuario responsavel;

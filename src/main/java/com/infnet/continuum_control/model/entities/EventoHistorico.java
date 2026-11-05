@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-@Entity
-@NoArgsConstructor
+
+
 public class EventoHistorico {
-    @Id
     private long id;
     private String acontecimento;
     private String descricao;

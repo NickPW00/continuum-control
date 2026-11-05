@@ -11,10 +11,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
-@NoArgsConstructor
+
 public class Missao {
-    @Id
     private long id;
     private String codigo;
     private String objetivo;
@@ -27,8 +25,8 @@ public class Missao {
     private LocalDateTime dataInicio;
     private LocalDateTime dataFim;
 
-    public void designar(){}
-    public void removerDesignar(Agente agente){}
+    public void designar(Agente agente) {}
+    public void removerDesignacao(Agente agente){}
     public boolean exigeAutorizacao(){return true;}
     public Autorizacao autorizar(Usuario responsavel){return null;}
     public void iniciar(){}
