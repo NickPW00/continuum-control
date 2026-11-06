@@ -4,9 +4,9 @@ spring:
   profiles:
     default: dev
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/continuum}
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/continuum}
     username: ${DB_USER:continuum}
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:continuum}
   jpa:
     open-in-view: false
     hibernate:
@@ -17,3 +17,6 @@ spring:
           time_zone: UTC
   flyway:
     locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8081}
