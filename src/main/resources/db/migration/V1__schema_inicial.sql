@@ -23,7 +23,7 @@ CREATE TABLE evento_historico (
     importancia VARCHAR(10) NOT NULL,
 
     CONSTRAINT pk_evento_historico PRIMARY KEY (id),
-    CONSTRAINT ck_evento_historico CHECK ( importancia IN ('BAIXA', 'MODERADA', 'ALTA', 'CRITICA') )
+    CONSTRAINT ck_evento_historico_importancia CHECK ( importancia IN ('BAIXA', 'MODERADA', 'ALTA', 'CRITICA') )
 );
 
 CREATE INDEX ix_evento_importancia ON evento_historico (importancia);
@@ -40,9 +40,12 @@ CREATE TABLE anomalia (
     observacoes TEXT,
 
     CONSTRAINT pk_anomalia PRIMARY KEY (id),
-    CONSTRAINT fk_evento_historico FOREIGN KEY REFERENCES (evento_id) ON DELETE RESTRICT,
+    CONSTRAINT fk_evento_historico FOREIGN KEY (evento_id) REFERENCES evento_historico (id) ON DELETE RESTRICT,
     CONSTRAINT ck_nivel_risco CHECK ( risco IN ('BAIXO', 'MODERADO', 'ALTO', 'CRITICO') ),
     CONSTRAINT ck_situacao_anomalia CHECK ( situacao IN ('DETECTADA', 'EM_ANALISE', 'CONFIRMADA', 'EM_CORRECAO', 'ESTABILIZADA', 'IRREVERSIVEL') ),
     CONSTRAINT ck_origem_anomalia CHECK ( origem IN ('INTERFERENCIA_NAO_AUTORIZADA', 'CONSEQUENCIA_MISSAO', 'FALHA_OPERACIONAL', 'DESCONHECIDA') )
 );
 
+CREATE INDEX ix_anomalia_evento ON anomalia (evento_id);
+CREATE INDEX ix_anomalia_situacao ON anomalia (situacao);
+CREATE INDEX ix_anomalia_risco ON anomalia (risco);

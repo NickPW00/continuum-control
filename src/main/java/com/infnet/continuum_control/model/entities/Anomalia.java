@@ -1,64 +1,124 @@
 package com.infnet.continuum_control.model.entities;
 
+import com.infnet.continuum_control.exception.RegraDeNegocioException;
 import com.infnet.continuum_control.model.enums.*;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.EnumSet;
+import java.util.Objects;
+import java.util.Set;
 
+@Entity
+@Table(name = "anomalia")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Anomalia {
-    private long id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "evento_id", nullable = false, updatable = false)
     private EventoHistorico evento;
+
+    @Column(name = "divergencia_observada", nullable = false, columnDefinition = "TEXT")
     private String divergenciaObservada;
+
+    @Column(name = "data_hora_deteccao", nullable = false, updatable = false)
     private LocalDateTime dataHoraDeteccao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "risco", nullable = false, length = 10)
     private NivelRisco risco;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "situacao", nullable = false, length = 15)
     private SituacaoAnomalia situacao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origem", length = 30)
     private OrigemAnomalia origem;
+
+    @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    public boolean podeReceberMissao(PropositoMissao p){
-        boolean isAnomaliaAtiva = this.isAtiva();
-        boolean isInvestigacao = this.situacao == SituacaoAnomalia.IRREVERSIVEL && p == PropositoMissao.INVESTIGACAO;
+    public Anomalia(EventoHistorico evento, String divergenciaObservada, NivelRisco risco,
+                    OrigemAnomalia origem, String observacoes) {
+        this.evento = Objects.requireNonNull(evento, "O evento histórico é obrigatório");
+        this.divergenciaObservada = Objects.requireNonNull(divergenciaObservada, "A divergência observada é obrigatória");
+        this.risco = Objects.requireNonNull(risco, "O risco é obrigatório");
+        this.origem = origem;
+        this.observacoes = observacoes;
+        this.situacao = SituacaoAnomalia.DETECTADA;
+        this.dataHoraDeteccao = LocalDateTime.now();
+    }
 
-        if (isAnomaliaAtiva) return true;
-        return isInvestigacao;
+    public boolean podeReceberMissao(PropositoMissao p) {
+        Objects.requireNonNull(p, "O propósito da missão é obrigatório");
+        if (this.isAtiva()) return true;
+        return this.situacao == SituacaoAnomalia.IRREVERSIVEL && p == PropositoMissao.INVESTIGACAO;
     }
 
     public void alterarRisco(NivelRisco novo) {
+        Objects.requireNonNull(novo, "O novo risco é obrigatório");
+        if (!this.isAtiva()) {
+            throw new RegraDeNegocioException("Só é possível alterar o risco de uma anomalia ativa; situação atual: " + this.situacao);
+        }
         this.risco = novo;
     }
 
-    public void declararIrreversivel(String justificativa){
-        boolean isIrreversivel = this.situacao == SituacaoAnomalia.DETECTADA || this.situacao == SituacaoAnomalia.CONFIRMADA;
-        if (isIrreversivel){
-            this.situacao = SituacaoAnomalia.IRREVERSIVEL;
-            this.observacoes = justificativa;
+    public void declararIrreversivel(String justificativa) {
+        Objects.requireNonNull(justificativa, "A justificativa é obrigatória");
+        if (this.situacao != SituacaoAnomalia.DETECTADA && this.situacao != SituacaoAnomalia.CONFIRMADA) {
+            throw new RegraDeNegocioException("Só é possível declarar irreversível uma anomalia DETECTADA ou CONFIRMADA; situação atual: " + this.situacao);
         }
+        this.situacao = SituacaoAnomalia.IRREVERSIVEL;
+        this.observacoes = justificativa;
     }
 
-    public boolean isAtiva(){
-        return this.situacao != SituacaoAnomalia.IRREVERSIVEL && this.situacao != SituacaoAnomalia.ESTABILIZADA;
+    public boolean isAtiva() {
+        return this.situacao == SituacaoAnomalia.DETECTADA
+                || this.situacao == SituacaoAnomalia.EM_ANALISE
+                || this.situacao == SituacaoAnomalia.CONFIRMADA
+                || this.situacao == SituacaoAnomalia.EM_CORRECAO;
     }
 
-    public boolean isCritica(){
-        return this.risco == NivelRisco.CRITICO;
+    public boolean isCritica() {
+        return this.isAtiva() && this.risco == NivelRisco.CRITICO;
     }
 
-    private void iniciarAtendimento(PropositoMissao p) {
-        if (p == PropositoMissao.CORRECAO) {
-            this.situacao = SituacaoAnomalia.EM_CORRECAO;
+    void iniciarAtendimento(PropositoMissao p) {
+        if (!this.podeReceberMissao(p)) {
+            throw new RegraDeNegocioException("A anomalia na situação " + this.situacao + " não admite missão de " + p);
         }
-        else this.situacao = SituacaoAnomalia.EM_ANALISE;
+        if (this.situacao == SituacaoAnomalia.IRREVERSIVEL) return;
+
+        if (this.situacao != SituacaoAnomalia.DETECTADA && this.situacao != SituacaoAnomalia.CONFIRMADA) {
+            throw new RegraDeNegocioException("Já existe um atendimento em curso para a anomalia; situação atual: " + this.situacao);
+        }
+        this.situacao = (p == PropositoMissao.CORRECAO)
+                ? SituacaoAnomalia.EM_CORRECAO
+                : SituacaoAnomalia.EM_ANALISE;
     }
 
-    private void encerrarAtendimento(SituacaoAnomalia situacaoFinal){
-        if (this.situacao == SituacaoAnomalia.EM_CORRECAO || this.situacao == SituacaoAnomalia.IRREVERSIVEL){
-            this.situacao = situacaoFinal;
+    void encerrarAtendimento(SituacaoAnomalia situacaoFinal) {
+        Objects.requireNonNull(situacaoFinal, "A situação final é obrigatória");
+        Set<SituacaoAnomalia> permitidas = switch (this.situacao) {
+            case EM_ANALISE -> EnumSet.of(SituacaoAnomalia.DETECTADA, SituacaoAnomalia.CONFIRMADA,
+                    SituacaoAnomalia.ESTABILIZADA, SituacaoAnomalia.IRREVERSIVEL);
+            case EM_CORRECAO -> EnumSet.of(SituacaoAnomalia.CONFIRMADA,
+                    SituacaoAnomalia.ESTABILIZADA, SituacaoAnomalia.IRREVERSIVEL);
+            case IRREVERSIVEL -> EnumSet.of(SituacaoAnomalia.IRREVERSIVEL);
+            default -> throw new RegraDeNegocioException("Não há atendimento em curso para a anomalia; situação atual: " + this.situacao);
+        };
+        if (!permitidas.contains(situacaoFinal)) {
+            throw new RegraDeNegocioException("Situação final " + situacaoFinal + " não é permitida a partir de " + this.situacao);
         }
+        this.situacao = situacaoFinal;
     }
 }
