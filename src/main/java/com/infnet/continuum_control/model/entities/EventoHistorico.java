@@ -47,4 +47,13 @@ public class EventoHistorico {
     public boolean isCritico(){
         return this.importancia == Importancia.CRITICA;
     }
+
+    public void atualizar(String acontecimento, String descricao, LocalDate data,
+                          String localizacao, Importancia importancia) {
+        if (acontecimento != null) this.acontecimento = acontecimento;
+        if (descricao != null) this.descricao = descricao;
+        if (data != null) this.data = data;
+        if (localizacao != null) this.localizacao = localizacao;
+        if (importancia != null) this.importancia = importancia;
+    }
 }
