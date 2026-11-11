@@ -2,6 +2,7 @@ package com.infnet.continuum_control.controller;
 
 import com.infnet.continuum_control.dto.agente.AgenteRequest;
 import com.infnet.continuum_control.dto.agente.AgenteResponse;
+import com.infnet.continuum_control.dto.agente.MotivoRequest;
 import com.infnet.continuum_control.model.enums.SituacaoAgente;
 import com.infnet.continuum_control.service.AgenteService;
 import jakarta.validation.Valid;
@@ -40,17 +41,17 @@ public class AgenteController {
     }
 
     @PostMapping("/{id}/suspender")
-    public AgenteResponse suspender(@PathVariable Long id) {
-        return agenteService.suspender(id);
+    public AgenteResponse suspender(@PathVariable Long id, @RequestBody @Valid MotivoRequest request) {
+        return agenteService.suspender(id, request.motivo());
     }
 
     @PostMapping("/{id}/reativar")
-    public AgenteResponse reativar(@PathVariable Long id) {
-        return agenteService.reativar(id);
+    public AgenteResponse reativar(@PathVariable Long id, @RequestBody @Valid MotivoRequest request) {
+        return agenteService.reativar(id, request.motivo());
     }
 
     @PostMapping("/{id}/inativar")
-    public AgenteResponse inativar(@PathVariable Long id) {
-        return agenteService.inativar(id);
+    public AgenteResponse inativar(@PathVariable Long id, @RequestBody @Valid MotivoRequest request) {
+        return agenteService.inativar(id, request.motivo());
     }
 }

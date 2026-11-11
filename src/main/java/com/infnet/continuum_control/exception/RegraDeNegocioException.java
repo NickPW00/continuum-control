@@ -1,8 +1,14 @@
 package com.infnet.continuum_control.exception;
 
+import lombok.Getter;
+
+@Getter
 public class RegraDeNegocioException extends RuntimeException {
 
-    public RegraDeNegocioException(String mensagem) {
+    private final String regra;
+
+    public RegraDeNegocioException(String regra, String mensagem) {
         super(mensagem);
+        this.regra = regra;
     }
 }

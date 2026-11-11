@@ -51,42 +51,45 @@ public class Agente {
         if(this.situacao == SituacaoAgente.DISPONIVEL){
             this.situacao = SituacaoAgente.EM_MISSAO;
         }
-        else throw new RegraDeNegocioException("O agente não pode entrar em missão; situação atual: " + this.situacao);
+        else throw new RegraDeNegocioException("G2", "O agente não pode entrar em missão; situação atual: " + this.situacao);
     }
 
-    public void liberar(){
+    void liberar(){
         if (this.situacao == SituacaoAgente.EM_MISSAO){
             this.situacao = SituacaoAgente.DISPONIVEL;
         }
-        else throw new RegraDeNegocioException("O agente não pode ser liberado; situação atual: " + this.situacao);
+        else throw new RegraDeNegocioException("G3", "O agente não pode ser liberado; situação atual: " + this.situacao);
     }
 
-    public void suspender(){
+    public void suspender(String motivo){
+        Objects.requireNonNull(motivo, "O motivo é obrigatório");
         if (this.situacao == SituacaoAgente.DISPONIVEL){
             this.situacao = SituacaoAgente.SUSPENSO;
         }
-        else throw new RegraDeNegocioException("O agente não pode ser suspenso; situação atual: " + this.situacao);
+        else throw new RegraDeNegocioException("G5", "O agente não pode ser suspenso; situação atual: " + this.situacao);
     }
 
     void suspenderPorFalha(){
         if (this.situacao == SituacaoAgente.EM_MISSAO){
             this.situacao = SituacaoAgente.SUSPENSO;
         }
-        else throw new RegraDeNegocioException("O agente não pode ser suspenso por falha de missão; situação atual: " + this.situacao);
+        else throw new RegraDeNegocioException("G4", "O agente não pode ser suspenso por falha de missão; situação atual: " + this.situacao);
     }
 
-    public void reativar(){
+    public void reativar(String motivo){
+        Objects.requireNonNull(motivo, "O motivo é obrigatório");
         if (this.situacao == SituacaoAgente.SUSPENSO){
             this.situacao = SituacaoAgente.DISPONIVEL;
         }
-        else throw new RegraDeNegocioException("O agente não pode ser reativado; situação atual: " + this.situacao);
+        else throw new RegraDeNegocioException("G6", "O agente não pode ser reativado; situação atual: " + this.situacao);
     }
 
-    public void inativar(){
+    public void inativar(String motivo){
+        Objects.requireNonNull(motivo, "O motivo é obrigatório");
         if (this.situacao == SituacaoAgente.SUSPENSO
                 || this.situacao == SituacaoAgente.DISPONIVEL){
             this.situacao = SituacaoAgente.INATIVO;
         }
-        else throw new RegraDeNegocioException("O agente não pode ser inativado; situação atual: " + this.situacao);
+        else throw new RegraDeNegocioException("G7", "O agente não pode ser inativado; situação atual: " + this.situacao);
     }
 }

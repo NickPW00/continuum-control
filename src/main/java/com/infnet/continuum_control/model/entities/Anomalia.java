@@ -48,14 +48,19 @@ public class Anomalia {
     private String observacoes;
 
     public Anomalia(EventoHistorico evento, String divergenciaObservada, NivelRisco risco,
-                    OrigemAnomalia origem, String observacoes) {
+                    OrigemAnomalia origem, String observacoes,
+                    LocalDateTime dataHoraDeteccao, LocalDateTime agora) {
         this.evento = Objects.requireNonNull(evento, "O evento histórico é obrigatório");
         this.divergenciaObservada = Objects.requireNonNull(divergenciaObservada, "A divergência observada é obrigatória");
         this.risco = Objects.requireNonNull(risco, "O risco é obrigatório");
+        Objects.requireNonNull(agora, "O instante atual é obrigatório");
         this.origem = origem;
         this.observacoes = observacoes;
         this.situacao = SituacaoAnomalia.DETECTADA;
-        this.dataHoraDeteccao = LocalDateTime.now();
+        this.dataHoraDeteccao = (dataHoraDeteccao != null) ? dataHoraDeteccao : agora;
+        if (this.dataHoraDeteccao.isAfter(agora)) {
+            throw new RegraDeNegocioException("N1", "A data de detecção não pode estar no futuro");
+        }
     }
 
     public boolean podeReceberMissao(PropositoMissao p) {
@@ -67,7 +72,7 @@ public class Anomalia {
     public void alterarRisco(NivelRisco novo) {
         Objects.requireNonNull(novo, "O novo risco é obrigatório");
         if (!this.isAtiva()) {
-            throw new RegraDeNegocioException("Só é possível alterar o risco de uma anomalia ativa; situação atual: " + this.situacao);
+            throw new RegraDeNegocioException("N7", "Só é possível alterar o risco de uma anomalia ativa; situação atual: " + this.situacao);
         }
         this.risco = novo;
     }
@@ -75,10 +80,9 @@ public class Anomalia {
     public void declararIrreversivel(String justificativa) {
         Objects.requireNonNull(justificativa, "A justificativa é obrigatória");
         if (this.situacao != SituacaoAnomalia.DETECTADA && this.situacao != SituacaoAnomalia.CONFIRMADA) {
-            throw new RegraDeNegocioException("Só é possível declarar irreversível uma anomalia DETECTADA ou CONFIRMADA; situação atual: " + this.situacao);
+            throw new RegraDeNegocioException("N6", "Só é possível declarar irreversível uma anomalia DETECTADA ou CONFIRMADA; situação atual: " + this.situacao);
         }
         this.situacao = SituacaoAnomalia.IRREVERSIVEL;
-        this.observacoes = justificativa;
     }
 
     public boolean isAtiva() {
@@ -94,12 +98,12 @@ public class Anomalia {
 
     void iniciarAtendimento(PropositoMissao p) {
         if (!this.podeReceberMissao(p)) {
-            throw new RegraDeNegocioException("A anomalia na situação " + this.situacao + " não admite missão de " + p);
+            throw new RegraDeNegocioException("D14", "A anomalia na situação " + this.situacao + " não admite missão de " + p);
         }
         if (this.situacao == SituacaoAnomalia.IRREVERSIVEL) return;
 
         if (this.situacao != SituacaoAnomalia.DETECTADA && this.situacao != SituacaoAnomalia.CONFIRMADA) {
-            throw new RegraDeNegocioException("Já existe um atendimento em curso para a anomalia; situação atual: " + this.situacao);
+            throw new RegraDeNegocioException("D23", "Já existe um atendimento em curso para a anomalia; situação atual: " + this.situacao);
         }
         this.situacao = (p == PropositoMissao.CORRECAO)
                 ? SituacaoAnomalia.EM_CORRECAO
@@ -114,10 +118,10 @@ public class Anomalia {
             case EM_CORRECAO -> EnumSet.of(SituacaoAnomalia.CONFIRMADA,
                     SituacaoAnomalia.ESTABILIZADA, SituacaoAnomalia.IRREVERSIVEL);
             case IRREVERSIVEL -> EnumSet.of(SituacaoAnomalia.IRREVERSIVEL);
-            default -> throw new RegraDeNegocioException("Não há atendimento em curso para a anomalia; situação atual: " + this.situacao);
+            default -> throw new RegraDeNegocioException("D35", "Não há atendimento em curso para a anomalia; situação atual: " + this.situacao);
         };
         if (!permitidas.contains(situacaoFinal)) {
-            throw new RegraDeNegocioException("Situação final " + situacaoFinal + " não é permitida a partir de " + this.situacao);
+            throw new RegraDeNegocioException("D35", "Situação final " + situacaoFinal + " não é permitida a partir de " + this.situacao);
         }
         this.situacao = situacaoFinal;
     }

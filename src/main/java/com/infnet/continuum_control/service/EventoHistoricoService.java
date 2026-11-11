@@ -4,14 +4,10 @@ import com.infnet.continuum_control.dto.evento_historico.AtualizarEventoRequest;
 import com.infnet.continuum_control.dto.evento_historico.CriarEventoRequest;
 import com.infnet.continuum_control.dto.evento_historico.EventoResponse;
 import com.infnet.continuum_control.exception.RecursoNaoEncontradoException;
-import com.infnet.continuum_control.model.entities.Agente;
 import com.infnet.continuum_control.model.entities.EventoHistorico;
 import com.infnet.continuum_control.model.enums.Importancia;
 import com.infnet.continuum_control.repository.EventoHistoricoRepository;
-
-import jdk.jfr.Event;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

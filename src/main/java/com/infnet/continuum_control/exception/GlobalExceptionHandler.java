@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestControllerAdvice
@@ -23,12 +24,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Map<String, String> MENSAGENS_CONSTRAINT = Map.of(
             "uk_agente_codigo", "Já existe um agente com este código",
-            "fk_evento_historico", "O evento histórico possui anomalias e não pode ser removido"
+            "fk_anomalia_evento", "O evento tem anomalias e não pode ser removido"
     );
 
     @ExceptionHandler(RegraDeNegocioException.class)
     public ProblemDetail regraDeNegocio(RegraDeNegocioException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problema.setProperty("regra", ex.getRegra());
+        return problema;
     }
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
@@ -39,10 +42,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail integridade(DataIntegrityViolationException ex) {
         String constraint = nomeDaConstraint(ex);
-        String mensagem = MENSAGENS_CONSTRAINT.getOrDefault(constraint,
-                "A operação viola uma restrição de integridade");
+        String mensagem = constraint == null
+                ? "A operação viola uma restrição de integridade"
+                : MENSAGENS_CONSTRAINT.getOrDefault(constraint, "A operação viola uma restrição de integridade");
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, mensagem);
-        problema.setProperty("constraint", constraint);
+        if (constraint != null) problema.setProperty("constraint", constraint);
         return problema;
     }
 
@@ -54,9 +58,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail inesperado(Exception ex) {
-        log.error("Erro inesperado", ex);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
+        String traceId = UUID.randomUUID().toString();
+        log.error("Erro inesperado [traceId={}]", traceId, ex);
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Erro interno; contate o suporte");
+        problema.setProperty("traceId", traceId);
+        return problema;
     }
 
     @Override

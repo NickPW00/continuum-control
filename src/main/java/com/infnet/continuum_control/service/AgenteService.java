@@ -22,7 +22,7 @@ public class AgenteService {
     @Transactional
     public AgenteResponse cadastrar(AgenteRequest request) {
         if (agenteRepository.existsByCodigo(request.codigo())) {
-            throw new RegraDeNegocioException("Já existe um agente com o código " + request.codigo());
+            throw new RegraDeNegocioException("G1", "Já existe um agente com o código " + request.codigo());
         }
         Agente agente = new Agente(request.codigo(), request.nome(), request.especialidade());
         return AgenteResponse.de(agenteRepository.save(agente));
@@ -49,23 +49,23 @@ public class AgenteService {
     }
 
     @Transactional
-    public AgenteResponse suspender(Long id) {
+    public AgenteResponse suspender(Long id, String motivo) {
         Agente agente = buscarEntidade(id);
-        agente.suspender();
+        agente.suspender(motivo);
         return AgenteResponse.de(agente);
     }
 
     @Transactional
-    public AgenteResponse reativar(Long id) {
+    public AgenteResponse reativar(Long id, String motivo) {
         Agente agente = buscarEntidade(id);
-        agente.reativar();
+        agente.reativar(motivo);
         return AgenteResponse.de(agente);
     }
 
     @Transactional
-    public AgenteResponse inativar(Long id) {
+    public AgenteResponse inativar(Long id, String motivo) {
         Agente agente = buscarEntidade(id);
-        agente.inativar();
+        agente.inativar(motivo);
         return AgenteResponse.de(agente);
     }
 
