@@ -1,0 +1,68 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": ["_id", "tipo", "missaoId", "agenteId", "dataHora", "observacao"],
+    "properties": {
+      "_id": { "bsonType": "objectId" },
+      "tipo": {
+        "enum": ["OBSERVACAO_HISTORICA", "ALTERACAO_DETECTADA", "EVIDENCIA_TEMPORAL",
+                 "DISTORCAO_TEMPORAL", "ENCONTRO_INESPERADO", "INCIDENTE_OPERACIONAL"]
+      },
+      "missaoId": { "bsonType": "long" },
+      "agenteId": { "bsonType": "long" },
+      "dataHora": { "bsonType": "date" },
+      "observacao": { "bsonType": "string", "maxLength": 4000 }
+    },
+    "oneOf": [
+      {
+        "properties": {
+          "tipo": { "enum": ["OBSERVACAO_HISTORICA"] },
+          "fatoObservado": { "bsonType": "string" },
+          "conformeEsperado": { "bsonType": "bool" }
+        },
+        "required": ["fatoObservado", "conformeEsperado"]
+      },
+      {
+        "properties": {
+          "tipo": { "enum": ["ALTERACAO_DETECTADA"] },
+          "valorEsperado": { "bsonType": "string" },
+          "valorObservado": { "bsonType": "string" }
+        },
+        "required": ["valorEsperado", "valorObservado"]
+      },
+      {
+        "properties": {
+          "tipo": { "enum": ["EVIDENCIA_TEMPORAL"] },
+          "objeto": { "bsonType": "string" },
+          "periodoEstimado": { "bsonType": "string" },
+          "grauConfiabilidade": { "bsonType": "double", "minimum": 0, "maximum": 1 }
+        },
+        "required": ["objeto", "periodoEstimado", "grauConfiabilidade"]
+      },
+      {
+        "properties": {
+          "tipo": { "enum": ["DISTORCAO_TEMPORAL"] },
+          "intensidade": { "bsonType": "int", "minimum": 1, "maximum": 10 },
+          "duracao": { "bsonType": "long", "minimum": 0 }
+        },
+        "required": ["intensidade", "duracao"]
+      },
+      {
+        "properties": {
+          "tipo": { "enum": ["ENCONTRO_INESPERADO"] },
+          "envolvidos": { "bsonType": "string" },
+          "houveContato": { "bsonType": "bool" }
+        },
+        "required": ["envolvidos", "houveContato"]
+      },
+      {
+        "properties": {
+          "tipo": { "enum": ["INCIDENTE_OPERACIONAL"] },
+          "gravidade": { "enum": ["MINIMO", "CONTROLADO", "SIGNIFICATIVO", "SEVERO"] },
+          "medidaTomada": { "bsonType": "string" }
+        },
+        "required": ["gravidade", "medidaTomada"]
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+# Perfil dos testes: os três bancos vêm do Testcontainers (@ServiceConnection), e o Flyway usa a
+# mesma conexão da aplicação. Com um usuário só, o V2 não faz nada (doc 04, 3.2).
+spring:
+  datasource:
+    password: test
+  flyway:
+    user:
+    password:
+    placeholders:
+      appUser: test
+  mongodb:
+    uri: mongodb://localhost:27017/continuum
+  data:
+    redis:
+      password:
+
+continuum:
+  outbox:
+    intervalo-ms: 600000
+  jwt:
+    segredo: segredo-dos-testes-automatizados-com-pelo-menos-32-bytes

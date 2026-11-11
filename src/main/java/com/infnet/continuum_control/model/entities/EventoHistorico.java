@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -25,6 +26,7 @@ public class EventoHistorico {
     @Column(name = "descricao", nullable = false, columnDefinition = "TEXT")
     private String descricao;
 
+    @Type(DataHistoricaType.class)
     @Column(name = "data", nullable = false)
     private LocalDate data;
 

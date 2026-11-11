@@ -18,6 +18,10 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Anomalia {
 
+    /** Anomalia ativa (doc 03, 5.3): ainda não ESTABILIZADA nem IRREVERSIVEL. */
+    public static final Set<SituacaoAnomalia> SITUACOES_ATIVAS = EnumSet.of(SituacaoAnomalia.DETECTADA,
+            SituacaoAnomalia.EM_ANALISE, SituacaoAnomalia.CONFIRMADA, SituacaoAnomalia.EM_CORRECAO);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -69,10 +73,19 @@ public class Anomalia {
         return this.situacao == SituacaoAnomalia.IRREVERSIVEL && p == PropositoMissao.INVESTIGACAO;
     }
 
+    public void atualizarDados(String divergenciaObservada, OrigemAnomalia origem, String observacoes) {
+        if (divergenciaObservada != null) this.divergenciaObservada = divergenciaObservada;
+        if (origem != null) this.origem = origem;
+        if (observacoes != null) this.observacoes = observacoes;
+    }
+
     public void alterarRisco(NivelRisco novo) {
         Objects.requireNonNull(novo, "O novo risco é obrigatório");
         if (!this.isAtiva()) {
             throw new RegraDeNegocioException("N7", "Só é possível alterar o risco de uma anomalia ativa; situação atual: " + this.situacao);
+        }
+        if (novo == this.risco) {
+            throw new RegraDeNegocioException("N7", "O novo risco é igual ao atual: " + this.risco);
         }
         this.risco = novo;
     }
@@ -86,10 +99,7 @@ public class Anomalia {
     }
 
     public boolean isAtiva() {
-        return this.situacao == SituacaoAnomalia.DETECTADA
-                || this.situacao == SituacaoAnomalia.EM_ANALISE
-                || this.situacao == SituacaoAnomalia.CONFIRMADA
-                || this.situacao == SituacaoAnomalia.EM_CORRECAO;
+        return SITUACOES_ATIVAS.contains(this.situacao);
     }
 
     public boolean isCritica() {

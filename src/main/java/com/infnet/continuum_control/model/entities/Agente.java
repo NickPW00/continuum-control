@@ -43,6 +43,11 @@ public class Agente {
         this.situacao = SituacaoAgente.DISPONIVEL;
     }
 
+    public void atualizar(String nome, String especialidade) {
+        if (nome != null) this.nome = nome;
+        if (especialidade != null) this.especialidade = especialidade;
+    }
+
     public boolean podeSerDesignado(){
         return this.situacao == SituacaoAgente.DISPONIVEL;
     }

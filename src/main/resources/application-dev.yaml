@@ -1,9 +1,20 @@
+# Perfil de desenvolvimento e avaliação: valores locais que combinam com o compose.yaml e o
+# .env.example, e carga dos dados iniciais (§25). Variáveis de ambiente continuam valendo.
 spring:
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  datasource:
+    password: ${DB_APP_PASSWORD:continuum_app}
+  flyway:
+    password: ${DB_MIGRACAO_PASSWORD:continuum_migracao}
+  mongodb:
+    uri: ${MONGO_URI:mongodb://continuum_app:continuum_app@localhost:27017/continuum?authSource=continuum&serverSelectionTimeoutMS=2000&connectTimeoutMS=2000}
+  data:
+    redis:
+      password: ${REDIS_PASSWORD:continuum_redis}
+
+continuum:
+  jwt:
+    segredo: ${JWT_SECRET:segredo-de-desenvolvimento-do-continuum-control-troque-em-producao}
+
 logging:
   level:
     org.flywaydb: info

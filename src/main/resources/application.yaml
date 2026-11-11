@@ -1,3 +1,6 @@
+# Tudo o que depende do ambiente vem de variáveis de ambiente (§24, doc 04 seção 7).
+# Senhas e o segredo do JWT não têm valor padrão aqui: o perfil dev (application-dev.yaml)
+# dá valores locais, e em outro ambiente eles precisam vir do ambiente.
 spring:
   application:
     name: continuum_control
@@ -5,8 +8,14 @@ spring:
     default: dev
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5434/continuum}
-    username: ${DB_USER:continuum}
-    password: ${DB_PASSWORD:continuum}
+    username: ${DB_APP_USER:continuum_app}
+    password: ${DB_APP_PASSWORD}
+  flyway:
+    locations: classpath:db/migration
+    user: ${DB_MIGRACAO_USER:continuum_migracao}   # o Flyway conecta com o dono do esquema (D43)
+    password: ${DB_MIGRACAO_PASSWORD}
+    placeholders:
+      appUser: ${DB_APP_USER:continuum_app}        # usado no V2__permissoes_aplicacao.sql
   jpa:
     open-in-view: false
     hibernate:
@@ -15,12 +24,55 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
-  flyway:
-    locations: classpath:db/migration
+  mongodb:
+    uri: ${MONGO_URI}
   data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      repositories:
+        enabled: false
     web:
-      pageable:
+      pageable:                            # doc 05, seção 2 (D47)
+        default-page-size: 20
         max-page-size: 100
+        serialization-mode: via-dto
 
 server:
-  port: ${SERVER_PORT:8081}
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      status:
+        order: DOWN, OUT_OF_SERVICE, ATRASADO, UP, UNKNOWN
+        http-mapping:
+          ATRASADO: 200
+
+continuum:
+  cache:
+    indicadores-validade: 60s
+  indice:                                  # doc 01, D36
+    janela: 30d
+    penalidade-risco:
+      BAIXO: 2
+      MODERADO: 5
+      ALTO: 10
+      CRITICO: 20
+    penalidade-missao-em-execucao: 2
+    penalidade-missao-falhou: 8
+    penalidade-intervencao-severa: 5
+  outbox:                                  # doc 04, seção 6
+    intervalo-ms: 2000
+    espera-maxima: 5m
+    alerta-pendente-apos: 5m
+    retencao-processados: 7d
+  jwt:                                     # doc 06, seção 2
+    segredo: ${JWT_SECRET}
+    validade: 60m
